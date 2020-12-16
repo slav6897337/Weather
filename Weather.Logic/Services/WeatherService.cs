@@ -4,15 +4,20 @@ using System.Threading.Tasks;
 using Weather.Logic.Interfaces;
 using Weather.Models;
 using System.Net.Http.Json;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Linq;
 
 namespace Weather.Logic.Services
 {
     public class WeatherService : IWeatherService
     {
-        private readonly string url = "https://api.openweathermap.org/data/2.5/weather/";
+        private readonly IHttpClientFactory clientFactory;
 
-        private readonly string key = "&appid=d8cb0f95b2e2ff51c7b576fed8bbbdd7";
-
+        public WeatherService(IHttpClientFactory clientFactory)
+        {
+            this.clientFactory = clientFactory;
+        }
         public async Task<TemperatureModel> Get(string city)
         {
             var weather = await GetJaysonFromUrl(city);
@@ -23,13 +28,24 @@ namespace Weather.Logic.Services
 
         public async Task<WeatherModel> GetJaysonFromUrl(string city)
         {
-            string urlWithParam = url + "?q=" + city + key;
+            var client = clientFactory.CreateClient("api.openweathermap.org");
 
-            using (HttpClient http = new HttpClient())
+            var requestHeader = client.DefaultRequestHeaders.First();
+            string key = requestHeader.Key;
+            string param = requestHeader.Value.First();
+
+
+            Dictionary<string, string> query = new Dictionary<string, string> 
             {
-                var weather = await http.GetFromJsonAsync(urlWithParam, typeof(WeatherModel), default);
-                return weather as WeatherModel;
-            }            
+                [key] = param,
+                ["q"] = city,
+            };
+
+            string baseAdress = client.BaseAddress.AbsoluteUri;            
+
+            var weather = await client.GetFromJsonAsync(QueryHelpers.AddQueryString(baseAdress, query), typeof(WeatherModel), default);
+
+            return weather as WeatherModel;
         }
 
         private double ConvertKelvinToCelsius(double tempKelvin) =>

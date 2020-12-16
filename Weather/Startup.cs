@@ -22,7 +22,14 @@ namespace Weather
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddTransient<IWeatherService, WeatherService>();
+            services.AddTransient<IWeatherService, WeatherService>();            
+            services.AddHttpClient("api.openweathermap.org", c =>
+            {
+                c.BaseAddress = new Uri(Configuration.GetConnectionString("Url"));
+
+                c.DefaultRequestHeaders.Add(Configuration.GetConnectionString("HeaderName"),
+                    Configuration.GetConnectionString("HeaderValue"));
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
