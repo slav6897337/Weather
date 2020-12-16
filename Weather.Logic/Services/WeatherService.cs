@@ -1,12 +1,9 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Net.Http;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Weather.Logic.Interfaces;
 using Weather.Models;
+using System.Net.Http.Json;
 
 namespace Weather.Logic.Services
 {
@@ -16,37 +13,27 @@ namespace Weather.Logic.Services
 
         private readonly string key = "&appid=d8cb0f95b2e2ff51c7b576fed8bbbdd7";
 
-        public async Task<string> GetWeather(string city)
-        {            
-            string jsonWeather = await GetJaysonFromUrl(city);
-            WetherModel wether = Deserialize(jsonWeather);
-            float celsius = ConvertKelvinToCelsius(wether.main.temp);
-            wether.main.temp = celsius;
-            string weatherJson = Serialize(wether.main);
-            return weatherJson;
+        public async Task<TemperatureModel> Get(string city)
+        {
+            var weather = await GetJaysonFromUrl(city);
+            double celsius = ConvertKelvinToCelsius(weather.main.temp);
+            weather.main.temp = celsius; 
+            return weather.main;
         }
 
-        public async Task<string> GetJaysonFromUrl(string city)
+        public async Task<WeatherModel> GetJaysonFromUrl(string city)
         {
             string urlWithParam = url + "?q=" + city + key;
 
             using (HttpClient http = new HttpClient())
             {
-                HttpResponseMessage response = await http.GetAsync(urlWithParam);
-                response.EnsureSuccessStatusCode();
-                string responseBody = await response.Content.ReadAsStringAsync();
-                return responseBody;
-            }
+                var weather = await http.GetFromJsonAsync(urlWithParam, typeof(WeatherModel), default);
+                return weather as WeatherModel;
+            }            
         }
 
-        public string Serialize<T>(T wether) => 
-            JsonConvert.SerializeObject(wether);
-
-        public WetherModel Deserialize(string jsonWether) =>
-            JsonConvert.DeserializeObject<WetherModel>(jsonWether);
-
-        public float ConvertKelvinToCelsius(float tempKelvin) =>
-            (float)Math.Round(tempKelvin - 273f, 1);
+        private double ConvertKelvinToCelsius(double tempKelvin) =>
+            Math.Round(tempKelvin - 273, 1);
         
     }
 }

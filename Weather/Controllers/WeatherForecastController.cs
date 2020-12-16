@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Weather.Logic.Interfaces;
+using Weather.Models;
 
 namespace Weather.Controllers
 {
@@ -13,11 +10,11 @@ namespace Weather.Controllers
     public class WeatherForecastController : ControllerBase
     {        
 
-        private readonly IWeatherService _wetherService;
+        private readonly IWeatherService _weatherService;
 
-        public WeatherForecastController(IWeatherService wetherService)
+        public WeatherForecastController(IWeatherService weatherService)
         {
-            _wetherService = wetherService;
+            _weatherService = weatherService;
         }
 
         [HttpGet]
@@ -25,7 +22,7 @@ namespace Weather.Controllers
         {
             if (!string.IsNullOrEmpty(city))
             {
-                string result =  await _wetherService.GetWeather(city);
+                var result = await _weatherService.Get(city);
                 return Ok(result);
             }
 

@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Weather.Models;
 
 namespace Weather.Logic.Interfaces
 {
     public interface IWeatherService
     {
-        Task<string> GetWeather(string city);
+        Task<TemperatureModel> Get(string city);
     }
 }

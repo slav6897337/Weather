@@ -2,6 +2,6 @@
 {
     public class TemperatureModel
     {
-        public float temp { get; set; }
+        public double temp { get; set; }
     }
 }
