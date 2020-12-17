@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Weather.Logic.Interfaces;
-using Weather.Models;
 
 namespace Weather.Controllers
 {
@@ -23,7 +22,11 @@ namespace Weather.Controllers
             if (!string.IsNullOrEmpty(city))
             {
                 var result = await _weatherService.Get(city);
-                return Ok(result);
+
+                if (result != null)
+                    return Ok(result);
+                else
+                    return NotFound(); 
             }
 
             return Ok();
